@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +24,7 @@ public class UserController {
 
     private final IUserService userService; 
     private final IBaseService<Person> personService; 
+    private final PasswordEncoder passwordEncoder;
     
     // Obtener todos los usuarios
     @GetMapping
@@ -43,11 +46,15 @@ public class UserController {
 
     // Crear usuario
     @PostMapping
-    public ResponseEntity<UserDto> create(@RequestBody UserDto dto) {
+    public ResponseEntity<UserDto> create(@Valid @RequestBody UserDto dto) {
         User entity = UserMapper.toEntity(dto);
 
         if (dto.getPersonId() != null) {
             personService.findById(dto.getPersonId()).ifPresent(entity::setPerson);
+        }
+
+        if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+            entity.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
 
         User saved = userService.save(entity);
@@ -56,13 +63,17 @@ public class UserController {
 
     // Actualizar usuario
     @PutMapping("/{id}")
-    public ResponseEntity<UserDto> update(@PathVariable Integer id, @RequestBody UserDto dto) {
+    public ResponseEntity<UserDto> update(@PathVariable Integer id, @Valid @RequestBody UserDto dto) {
         return userService.findById(id)
                 .map(existing -> {
                     existing.setEmail(dto.getEmail());
-                    existing.setPassword(dto.getPassword());
+                    if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
+                        existing.setPassword(passwordEncoder.encode(dto.getPassword()));
+                    }
                     existing.setRegistrationDate(dto.getRegistrationDate());
                     existing.setIsDeleted(dto.getIsDeleted());
+                    if (dto.getEnabled() != null) existing.setEnabled(dto.getEnabled());
+                    if (dto.getLocked() != null) existing.setLocked(dto.getLocked());
                     if (dto.getPersonId() != null)
                         personService.findById(dto.getPersonId()).ifPresent(existing::setPerson);
 

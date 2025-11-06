@@ -2,77 +2,93 @@ package com.modelsecurity.config;
 
 import com.modelsecurity.entity.*;
 import com.modelsecurity.repository.*;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.stereotype.Component;
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
-@Component
-public class DataInitializer implements ApplicationRunner {
+@Configuration
+@RequiredArgsConstructor
+public class DataInitializer {
 
     private final UserRepository userRepository;
     private final PersonRepository personRepository;
     private final RolRepository rolRepository;
+    private final RolUserRepository rolUserRepository;
+    private final FormRepository formRepository;
+    private final PermissionRepository permissionRepository;
+    private final RolFormPermitRepository rolFormPermitRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public DataInitializer(UserRepository userRepository,
-                           PersonRepository personRepository,
-                           RolRepository rolRepository,
-                           PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.personRepository = personRepository;
-        this.rolRepository = rolRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    @Bean
+    @Transactional
+    CommandLineRunner seedInitialData() {
+        return args -> {
+            // Usuario admin por defecto
+            final String adminEmail = "admin@example.com";
+            userRepository.findByEmail(adminEmail).ifPresentOrElse(u -> {}, () -> {
+                // Persona
+                Person p = Person.builder()
+                        .firstName("Admin")
+                        .lastName("System")
+                        .documentType("CC")
+                        .document("999999999")
+                        .dateBorn(LocalDate.of(1990,1,1))
+                        .phoneNumber("3000000000")
+                        .gender("N")
+                        .personExter("N")
+                        .epsId("EPS0")
+                        .cityId(1)
+                        .isDeleted(false)
+                        .build();
+                p = personRepository.save(p);
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        final String adminEmail = "admin@admin.com";
-        final String adminPassword = "Admin123!"; // recommend changing in prod
+                // Rol ADMIN
+                Rol adminRol = rolRepository.findByName("ADMIN").orElseGet(() -> {
+                    Rol r = Rol.builder().name("ADMIN").description("Administrador").isDeleted(false).build();
+                    return rolRepository.save(r);
+                });
 
-        if (userRepository.existsByEmail(adminEmail)) {
-            return;
-        }
+                // Usuario
+                User admin = User.builder()
+                        .email(adminEmail)
+                        .password(passwordEncoder.encode("AdminSegura123!"))
+                        .registrationDate(LocalDateTime.now())
+                        .enabled(true)
+                        .locked(false)
+                        .isDeleted(false)
+                        .person(p)
+                        .build();
+                admin = userRepository.save(admin);
 
-        // create person
-        Person person = Person.builder()
-                .firstName("Administrador")
-                .lastName("Sistema")
-                .documentType("N/A")
-                .document("0000")
-                .isDeleted(false)
-                .build();
-        person = personRepository.save(person);
+                // Vincular rol a usuario
+                RolUser ru = RolUser.builder()
+                        .rol(adminRol)
+                        .user(admin)
+                        .isDeleted(false)
+                        .build();
+                rolUserRepository.save(ru);
 
-        // create role
-        Rol rol = Rol.builder()
-                .name("ADMIN")
-                .description("Rol administrador con todos los permisos")
-                .isDeleted(false)
-                .build();
-        rol = rolRepository.save(rol);
-
-        // create user
-        User user = User.builder()
-                .email(adminEmail)
-                .password(passwordEncoder.encode(adminPassword))
-                .registrationDate(LocalDateTime.now())
-                .isDeleted(false)
-                .person(person)
-                .build();
-
-        // create rol-user mapping and assign to user
-        RolUser ru = RolUser.builder()
-                .rol(rol)
-                .user(user)
-                .isDeleted(false)
-                .build();
-
-        user.setRolUser(List.of(ru));
-
-        userRepository.save(user);
+                // Permisos básicos por formulario de ejemplo
+                Form userForm = formRepository.findById(1).orElseGet(() ->
+                        formRepository.save(Form.builder().name("USER_FORM").description("Gestión usuarios").isDeleted(false).build())
+                );
+                Permission readPerm = permissionRepository.findById(1).orElseGet(() ->
+                        permissionRepository.save(Permission.builder().name("READ").description("Puede leer").isDeleted(false).build())
+                );
+                RolFormPermit rfp = RolFormPermit.builder()
+                        .rol(adminRol)
+                        .form(userForm)
+                        .permission(readPerm)
+                        .isDeleted(false)
+                        .build();
+                rolFormPermitRepository.save(rfp);
+            });
+        };
     }
 }

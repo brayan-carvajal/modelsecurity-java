@@ -2,6 +2,8 @@ package com.modelsecurity.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.List;
 
@@ -9,6 +11,8 @@ import java.util.List;
 @Table(name = "rol")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
+@SQLDelete(sql = "UPDATE rol SET is_deleted = true WHERE id = ?")
+@SQLRestriction("is_deleted = false")
 public class Rol {
 
     @Id
@@ -17,6 +21,8 @@ public class Rol {
 
     private String name;
     private String description;
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
     private Boolean isDeleted = false;
 
     // Un rol puede pertenecer a muchos usuarios

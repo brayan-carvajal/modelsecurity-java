@@ -1,91 +1,71 @@
 package com.modelsecurity.controller;
 
-import com.modelsecurity.config.JwtUtil;
-import com.modelsecurity.dto.*;
-import com.modelsecurity.entity.Person;
+import com.modelsecurity.dto.auth.LoginRequest;
+import com.modelsecurity.dto.auth.LoginResponse;
+import com.modelsecurity.dto.auth.RegisterRequest;
 import com.modelsecurity.entity.User;
-import com.modelsecurity.repository.PersonRepository;
-import com.modelsecurity.repository.UserRepository;
+import com.modelsecurity.mapper.UserMapper;
+import com.modelsecurity.security.JwtTokenProvider;
+import com.modelsecurity.service.interfaces.IUserService;
+import com.modelsecurity.service.interfaces.IBaseService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.*;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthenticationManager authManager;
-    private final JwtUtil jwtUtil;
-    private final UserRepository userRepository;
-    private final PersonRepository personRepository;
+    private final IUserService userService;
+    private final IBaseService<com.modelsecurity.entity.Person> personService;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
+    @Value("${jwt.expiration-ms}")
+    private long jwtExpirationMs;
 
-    public AuthController(AuthenticationManager authManager,
-                          JwtUtil jwtUtil,
-                          UserRepository userRepository,
-                          PersonRepository personRepository,
-                          PasswordEncoder passwordEncoder) {
-        this.authManager = authManager;
-        this.jwtUtil = jwtUtil;
-        this.userRepository = userRepository;
-        this.personRepository = personRepository;
-        this.passwordEncoder = passwordEncoder;
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+        if (userService.findByEmail(request.getEmail()).isPresent()) {
+            return ResponseEntity.badRequest().body("Email ya registrado");
+        }
+        User user = new User();
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setRegistrationDate(LocalDateTime.now());
+        user.setEnabled(true);
+        user.setLocked(false);
+
+        if (request.getPersonId() != null) {
+            personService.findById(request.getPersonId()).ifPresent(user::setPerson);
+        }
+        if (user.getPerson() == null) {
+            return ResponseEntity.badRequest().body("Debe asociar un personId válido");
+        }
+
+        User saved = userService.save(user);
+        return ResponseEntity.ok(UserMapper.toDto(saved));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
-        try {
-            Authentication authentication = authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.email(), request.password())
-            );
-
-            org.springframework.security.core.userdetails.User userDetails =
-                    (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
-
-            var authorities = userDetails.getAuthorities().stream()
-                    .map(a -> a.getAuthority()).collect(Collectors.toList());
-
-            String token = jwtUtil.generateToken(userDetails.getUsername(), authorities);
-
-            return ResponseEntity.ok(new AuthResponse(token, "Bearer", userDetails.getUsername(), Instant.now()));
-        } catch (BadCredentialsException ex) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+        var userOpt = userService.findByEmail(request.getEmail());
+        if (userOpt.isEmpty()) {
             return ResponseEntity.status(401).body("Credenciales inválidas");
         }
-    }
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterRequest req) {
-        if (userRepository.existsByEmail(req.email())) {
-            return ResponseEntity.badRequest().body("El email ya está registrado");
+        User user = userOpt.get();
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            return ResponseEntity.status(401).body("Credenciales inválidas");
         }
-
-        // crear person
-        Person person = Person.builder()
-                .firstName(req.firstName())
-                .lastName(req.lastName())
-                .documentType(req.documentType())
-                .document(req.document())
-                .isDeleted(false)
-                .build();
-        person = personRepository.save(person);
-
-        // crear user
-        User user = User.builder()
-                .email(req.email())
-                .password(passwordEncoder.encode(req.password()))
-                .registrationDate(LocalDateTime.now())
-                .isDeleted(false)
-                .person(person)
-                .build();
-
-        userRepository.save(user);
-
-        return ResponseEntity.ok("Usuario creado correctamente");
+        if (!Boolean.TRUE.equals(user.getEnabled()) || Boolean.TRUE.equals(user.getLocked())) {
+            return ResponseEntity.status(403).body("Cuenta deshabilitada o bloqueada");
+        }
+        String token = jwtTokenProvider.generateToken(user.getEmail());
+        return ResponseEntity.ok(new LoginResponse(token, "Bearer", jwtExpirationMs / 1000));
     }
 }
