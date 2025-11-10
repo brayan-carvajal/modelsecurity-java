@@ -3,8 +3,10 @@ package com.modelsecurity.controller;
 import com.modelsecurity.dto.PersonDto;
 import com.modelsecurity.entity.Person;
 import com.modelsecurity.mapper.PersonMapper;
+import com.modelsecurity.security.UserSecurity;
 import com.modelsecurity.service.interfaces.IBaseService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +19,21 @@ import java.util.stream.Collectors;
 public class PersonController {
 
     private final IBaseService<Person> personService;
+    private final UserSecurity userSecurity;
 
+    @GetMapping("/me")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+    public ResponseEntity<PersonDto> getCurrentUserPerson() {
+        Integer currentPersonId = userSecurity.getCurrentPersonId();
+        if (currentPersonId == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return personService.findById(currentPersonId)
+            .map(p -> ResponseEntity.ok(PersonMapper.toDto(p)))
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<PersonDto>> getAll() {
         List<PersonDto> list = personService.findAll()
@@ -27,6 +43,7 @@ public class PersonController {
         return ResponseEntity.ok(list);
     }
 
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @userSecurity.isCurrentUser(#id))")
     @GetMapping("/{id}")
     public ResponseEntity<PersonDto> getById(@PathVariable Integer id) {
         return personService.findById(id)
@@ -34,6 +51,7 @@ public class PersonController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<PersonDto> create(@RequestBody PersonDto dto) {
         Person entity = PersonMapper.toEntity(dto);
@@ -41,23 +59,26 @@ public class PersonController {
         return ResponseEntity.ok(PersonMapper.toDto(saved));
     }
 
+    @PreAuthorize("hasRole('ADMIN') or (hasRole('USER') and @userSecurity.isCurrentUser(#id))")
     @PutMapping("/{id}")
     public ResponseEntity<PersonDto> update(@PathVariable Integer id, @RequestBody PersonDto dto) {
         return personService.findById(id)
                 .map(existing -> {
-                    existing.setFirstName(dto.getFirstName());
-                    existing.setLastName(dto.getLastName());
-                    existing.setMiddleName(dto.getMiddleName());
-                    existing.setSecondLastName(dto.getSecondLastName());
-                    existing.setDocumentType(dto.getDocumentType());
-                    existing.setDocument(dto.getDocument());
-                    existing.setPhoneNumber(dto.getPhoneNumber());
-                    existing.setDateBorn(dto.getDateBorn());
-                    existing.setGender(dto.getGender());
-                    existing.setEpsId(dto.getEpsId());
-                    existing.setPersonExter(dto.getPersonExter());
-                    existing.setCityId(dto.getCityId());
-                    existing.setIsDeleted(dto.getIsDeleted());
+                    // Actualizamos solo los campos que no son null en el DTO
+                    if (dto.getFirstName() != null) existing.setFirstName(dto.getFirstName());
+                    if (dto.getLastName() != null) existing.setLastName(dto.getLastName());
+                    if (dto.getMiddleName() != null) existing.setMiddleName(dto.getMiddleName());
+                    if (dto.getSecondLastName() != null) existing.setSecondLastName(dto.getSecondLastName());
+                    if (dto.getDocumentType() != null) existing.setDocumentType(dto.getDocumentType());
+                    if (dto.getDocument() != null) existing.setDocument(dto.getDocument());
+                    if (dto.getPhoneNumber() != null) existing.setPhoneNumber(dto.getPhoneNumber());
+                    if (dto.getDateBorn() != null) existing.setDateBorn(dto.getDateBorn());
+                    if (dto.getGender() != null) existing.setGender(dto.getGender());
+                    if (dto.getEpsId() != null) existing.setEpsId(dto.getEpsId());
+                    if (dto.getPersonExter() != null) existing.setPersonExter(dto.getPersonExter());
+                    if (dto.getCityId() != null) existing.setCityId(dto.getCityId());
+                    // Mantenemos el valor existente de isDeleted
+                    // existing.setIsDeleted(existing.getIsDeleted());
 
                     Person updated = personService.update(id, existing);
                     return ResponseEntity.ok(PersonMapper.toDto(updated));
@@ -65,6 +86,7 @@ public class PersonController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         try {

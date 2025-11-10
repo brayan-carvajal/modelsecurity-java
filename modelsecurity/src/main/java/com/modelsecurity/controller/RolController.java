@@ -6,6 +6,7 @@ import com.modelsecurity.mapper.RolMapper;
 import com.modelsecurity.service.interfaces.IBaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class RolController {
     private final IBaseService<Rol> rolService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<RolDto>> getAll() {
         List<RolDto> list = rolService.findAll()
                 .stream()
@@ -28,6 +30,7 @@ public class RolController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RolDto> getById(@PathVariable Integer id) {
         return rolService.findById(id)
                 .map(r -> ResponseEntity.ok(RolMapper.toDto(r)))
@@ -35,6 +38,7 @@ public class RolController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RolDto> create(@RequestBody RolDto dto) {
         Rol entity = RolMapper.toEntity(dto);
         Rol saved = rolService.save(entity);
@@ -42,6 +46,7 @@ public class RolController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<RolDto> update(@PathVariable Integer id, @RequestBody RolDto dto) {
         return rolService.findById(id)
                 .map(existing -> {
@@ -55,6 +60,7 @@ public class RolController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         try {
             rolService.delete(id);

@@ -8,6 +8,7 @@ import com.modelsecurity.mapper.FormModuleMapper;
 import com.modelsecurity.service.interfaces.IBaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,6 +24,7 @@ public class FormModuleController {
     private final IBaseService<Module> moduleService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<List<FormModuleDto>> getAll() {
         List<FormModuleDto> list = formModuleService.findAll()
                 .stream()
@@ -32,6 +34,7 @@ public class FormModuleController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<FormModuleDto> getById(@PathVariable Integer id) {
         return formModuleService.findById(id)
                 .map(fm -> ResponseEntity.ok(FormModuleMapper.toDto(fm)))
@@ -39,6 +42,7 @@ public class FormModuleController {
     }
 
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<FormModuleDto> create(@RequestBody FormModuleDto dto) {
         var formOpt = formService.findById(dto.getFormId());
         var moduleOpt = moduleService.findById(dto.getModuleId());
@@ -56,6 +60,7 @@ public class FormModuleController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable Integer id) {
         try {
             formModuleService.delete(id);

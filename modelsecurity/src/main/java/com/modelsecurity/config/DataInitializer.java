@@ -29,6 +29,12 @@ public class DataInitializer {
     @Transactional
     CommandLineRunner seedInitialData() {
         return args -> {
+            // Rol USER por defecto (siempre se crea)
+            rolRepository.findByName("USER").orElseGet(() -> {
+                Rol r = Rol.builder().name("USER").description("Usuario Regular").isDeleted(false).build();
+                return rolRepository.save(r);
+            });
+
             // Usuario admin por defecto
             final String adminEmail = "admin@example.com";
             userRepository.findByEmail(adminEmail).ifPresentOrElse(u -> {}, () -> {

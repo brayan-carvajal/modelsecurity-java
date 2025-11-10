@@ -1,10 +1,12 @@
 package com.modelsecurity.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import java.time.LocalDate;
 
 @Data
 public class PersonDto {
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer id;
     private String firstName;
     private String middleName;
@@ -18,5 +20,6 @@ public class PersonDto {
     private String personExter;
     private String epsId;
     private Integer cityId;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Boolean isDeleted;
 }

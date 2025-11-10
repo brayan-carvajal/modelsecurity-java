@@ -8,8 +8,16 @@ import lombok.Data;
 public class RegisterRequest {
     @Email @NotBlank
     private String email;
+    
     @NotBlank
     private String password;
-    // Opcionalmente vincular a una persona existente
-    private Integer personId;
+    
+    @NotBlank
+    private String firstName;
+    
+    @NotBlank
+    private String lastName;
+    
+    private String documentType;
+    private String document;
 }

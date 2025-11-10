@@ -42,7 +42,7 @@ public class User {
 
     // Relación con Person
     @OneToOne
-    @JoinColumn(name = "person_id", nullable = false)
+    @JoinColumn(name = "person_id", nullable = true)
     private Person person;
 
     // Relación con RolUser

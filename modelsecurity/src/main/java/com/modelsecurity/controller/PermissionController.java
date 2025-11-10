@@ -6,6 +6,7 @@ import com.modelsecurity.mapper.PermissionMapper;
 import com.modelsecurity.service.interfaces.IBaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/permissions")
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('ADMIN')")
 public class PermissionController {
 
     private final IBaseService<Permission> permissionService;
