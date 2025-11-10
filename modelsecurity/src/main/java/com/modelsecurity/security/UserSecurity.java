@@ -1,6 +1,5 @@
 package com.modelsecurity.security;
 
-import com.modelsecurity.entity.Person;
 import com.modelsecurity.entity.RolUser;
 import com.modelsecurity.entity.User;
 import com.modelsecurity.service.interfaces.IBaseService;
