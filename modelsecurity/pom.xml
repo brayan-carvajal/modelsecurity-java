@@ -36,6 +36,12 @@
          =============================== -->
     <dependencies>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+
         <!-- ==== FRAMEWORKS PRINCIPALES ==== -->
 
         <!-- Spring Boot Web: para crear controladores REST, manejar JSON y endpoints HTTP -->
