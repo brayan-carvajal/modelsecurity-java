@@ -16,7 +16,6 @@ public class UserSecurity {
 
     private final IUserService userService;
     private final IBaseService<RolUser> rolUserService;
-    private final IBaseService<Person> personService;
 
     public Integer getCurrentPersonId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

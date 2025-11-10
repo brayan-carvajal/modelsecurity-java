@@ -72,8 +72,6 @@ public class UserController {
                     }
                     existing.setRegistrationDate(dto.getRegistrationDate());
                     existing.setIsDeleted(dto.getIsDeleted());
-                    if (dto.getEnabled() != null) existing.setEnabled(dto.getEnabled());
-                    if (dto.getLocked() != null) existing.setLocked(dto.getLocked());
                     if (dto.getPersonId() != null)
                         personService.findById(dto.getPersonId()).ifPresent(existing::setPerson);
 

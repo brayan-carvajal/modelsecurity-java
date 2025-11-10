@@ -16,7 +16,6 @@ public class UserDto {
     private LocalDateTime registrationDate;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Boolean isDeleted;
-    private Boolean enabled;
-    private Boolean locked;
+    // account state fields removed (managed by security defaults)
     private Integer personId; 
 }

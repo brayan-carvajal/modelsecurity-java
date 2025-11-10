@@ -55,15 +55,13 @@ public class AuthController {
             person = personService.save(person);
 
             // 2. Crear el User
-            User user = User.builder()
-                    .email(request.getEmail())
-                    .password(passwordEncoder.encode(request.getPassword()))
-                    .registrationDate(LocalDateTime.now())
-                    .enabled(true)
-                    .locked(false)
-                    .isDeleted(false)
-                    .person(person)
-                    .build();
+        User user = User.builder()
+            .email(request.getEmail())
+            .password(passwordEncoder.encode(request.getPassword()))
+            .registrationDate(LocalDateTime.now())
+            .isDeleted(false)
+            .person(person)
+            .build();
             
             // 3. Guardar el User
             User saved = userService.save(user);
@@ -96,8 +94,8 @@ public class AuthController {
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             return ResponseEntity.status(401).body("Credenciales inválidas");
         }
-        if (!Boolean.TRUE.equals(user.getEnabled()) || Boolean.TRUE.equals(user.getLocked())) {
-            return ResponseEntity.status(403).body("Cuenta deshabilitada o bloqueada");
+        if (Boolean.TRUE.equals(user.getIsDeleted())) {
+            return ResponseEntity.status(403).body("Cuenta eliminada/deshabilitada");
         }
         String token = jwtTokenProvider.generateToken(user.getEmail());
         return ResponseEntity.ok(new LoginResponse(token, "Bearer", jwtExpirationMs / 1000));

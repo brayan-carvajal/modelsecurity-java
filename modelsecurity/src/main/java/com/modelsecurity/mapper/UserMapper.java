@@ -13,9 +13,7 @@ public class UserMapper {
         dto.setId(entity.getId());
         dto.setEmail(entity.getEmail());
         dto.setRegistrationDate(entity.getRegistrationDate());
-        dto.setIsDeleted(entity.getIsDeleted());
-        dto.setEnabled(entity.getEnabled());
-        dto.setLocked(entity.getLocked());
+    dto.setIsDeleted(entity.getIsDeleted());
         dto.setPersonId(
                 entity.getPerson() != null ? entity.getPerson().getId() : null
         );
@@ -30,9 +28,7 @@ public class UserMapper {
         entity.setId(dto.getId());
         entity.setEmail(dto.getEmail());
         entity.setRegistrationDate(dto.getRegistrationDate());
-        entity.setIsDeleted(dto.getIsDeleted());
-        entity.setEnabled(dto.getEnabled() != null ? dto.getEnabled() : true);
-        entity.setLocked(dto.getLocked() != null ? dto.getLocked() : false);
+    entity.setIsDeleted(dto.getIsDeleted());
         return entity;
     }
 }

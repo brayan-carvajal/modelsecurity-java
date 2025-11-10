@@ -51,8 +51,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .username(user.getEmail())
                 .password(user.getPassword())
                 .authorities(authorities)
-                .accountLocked(Boolean.TRUE.equals(user.getLocked()))
-                .disabled(!Boolean.TRUE.equals(user.getEnabled()))
+                // enabled/locked removed from entity; use defaults: account not locked, enabled
+                .accountLocked(false)
+                .disabled(false)
                 .build();
     }
 }

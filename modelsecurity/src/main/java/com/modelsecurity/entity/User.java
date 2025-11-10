@@ -31,14 +31,7 @@ public class User {
     @Builder.Default
     private Boolean isDeleted = false;
 
-    // Estado de la cuenta
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean enabled = true;
-
-    @Column(nullable = false)
-    @Builder.Default
-    private Boolean locked = false;
+    // Estado de la cuenta (removed: enabled/locked managed by security defaults)
 
     // Relación con Person
     @OneToOne

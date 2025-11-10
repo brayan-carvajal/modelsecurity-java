@@ -65,8 +65,7 @@ public class DataInitializer {
                         .email(adminEmail)
                         .password(passwordEncoder.encode("AdminSegura123!"))
                         .registrationDate(LocalDateTime.now())
-                        .enabled(true)
-                        .locked(false)
+            // enabled/locked removed; managed by security defaults
                         .isDeleted(false)
                         .person(p)
                         .build();
