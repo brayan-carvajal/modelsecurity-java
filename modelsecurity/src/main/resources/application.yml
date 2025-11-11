@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: modelsecurity
+  profiles:
+    active: postgresql
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+  jwt:
+    secret: mySecretKey
+    expiration: 86400000
+    expiration-ms: 86400000
+
+server:
+  port: 8081
+
+---
+# PERFIL: MySQL
+spring:
+  config:
+    activate:
+      on-profile: mysql
+  datasource:
+    url: jdbc:mysql://localhost:3306/modelsecurity
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+  flyway:
+    locations: classpath:db/migration/mysql
+
+---
+# PERFIL: PostgreSQL
+spring:
+  config:
+    activate:
+      on-profile: postgresql
+  datasource:
+    url: jdbc:postgresql://localhost:5432/modelsecurity
+    username: postgres
+    password: 123456
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    locations: classpath:db/migration/postgresql
+
+---
+# PERFIL: SQL Server
+spring:
+  config:
+    activate:
+      on-profile: sqlserver
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=modelsecurity;encrypt=false
+    username: sa
+    password: 123456
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    database-platform: org.hibernate.dialect.SQLServerDialect
+  flyway:
+    locations: classpath:db/migration/sqlserver

@@ -52,7 +52,6 @@ public class FormController {
                 .map(existing -> {
                     existing.setName(dto.getName());
                     existing.setDescription(dto.getDescription());
-                    existing.setIsDeleted(dto.getIsDeleted());
                     Form updated = formService.update(id, existing);
                     return ResponseEntity.ok(FormMapper.toDto(updated));
                 })

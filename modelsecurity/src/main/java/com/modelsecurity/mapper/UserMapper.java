@@ -28,7 +28,7 @@ public class UserMapper {
         entity.setId(dto.getId());
         entity.setEmail(dto.getEmail());
         entity.setRegistrationDate(dto.getRegistrationDate());
-    entity.setIsDeleted(dto.getIsDeleted());
+    entity.setIsDeleted(dto.getIsDeleted() != null ? dto.getIsDeleted() : false);
         return entity;
     }
 }

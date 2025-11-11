@@ -7,19 +7,20 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
 
-    @Value("${jwt.secret}")
+    @Value("${spring.jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration-ms}")
+    @Value("${spring.jwt.expiration-ms}")
     private long jwtExpirationMs;
 
-    private Key getSigningKey() {
+    private SecretKey getSigningKey() {
         // Detectar si parece Base64 (solo caracteres válidos y sin espacios)
         String trimmed = jwtSecret.trim();
         boolean looksBase64 = trimmed.matches("[A-Za-z0-9+/=]+") && trimmed.length() % 4 == 0;
@@ -58,7 +59,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
+            Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token);
             return true;
         } catch (Exception e) {
             return false;
@@ -66,8 +67,8 @@ public class JwtTokenProvider {
     }
 
     public String getSubject(String token) {
-        Claims claims = Jwts.parser().setSigningKey(getSigningKey()).build()
-                .parseClaimsJws(token).getBody();
+        Claims claims = Jwts.parser().verifyWith(getSigningKey()).build()
+                .parseSignedClaims(token).getPayload();
         return claims.getSubject();
     }
 }

@@ -22,7 +22,7 @@ public class RolFormPermitMapper {
 
         RolFormPermit entity = new RolFormPermit();
         entity.setId(dto.getId());
-        entity.setIsDeleted(dto.getIsDeleted());
+        entity.setIsDeleted(dto.getIsDeleted() != null ? dto.getIsDeleted() : false);
         return entity;
     }
 }

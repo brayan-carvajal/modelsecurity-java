@@ -21,7 +21,7 @@ public class RolUserMapper {
 
         RolUser entity = new RolUser();
         entity.setId(dto.getId());
-        entity.setIsDeleted(dto.getIsDeleted());
+        entity.setIsDeleted(dto.getIsDeleted() != null ? dto.getIsDeleted() : false);
         return entity;
     }
 }

@@ -52,7 +52,6 @@ public class ModuleController {
                 .map(existing -> {
                     existing.setName(dto.getName());
                     existing.setDescription(dto.getDescription());
-                    existing.setIsDeleted(dto.getIsDeleted());
                     Module updated = moduleService.update(id, existing);
                     return ResponseEntity.ok(ModuleMapper.toDto(updated));
                 })

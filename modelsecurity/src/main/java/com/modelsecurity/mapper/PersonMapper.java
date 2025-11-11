@@ -45,7 +45,7 @@ public class PersonMapper {
         entity.setPersonExter(dto.getPersonExter());
         entity.setEpsId(dto.getEpsId());
         entity.setCityId(dto.getCityId());
-        entity.setIsDeleted(dto.getIsDeleted());
+        entity.setIsDeleted(dto.getIsDeleted() != null ? dto.getIsDeleted() : false);
         return entity;
     }
 }

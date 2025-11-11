@@ -52,7 +52,6 @@ public class RolController {
                 .map(existing -> {
                     existing.setName(dto.getName());
                     existing.setDescription(dto.getDescription());
-                    existing.setIsDeleted(dto.getIsDeleted());
                     Rol updated = rolService.update(id, existing);
                     return ResponseEntity.ok(RolMapper.toDto(updated));
                 })

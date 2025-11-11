@@ -19,7 +19,7 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("ModelSecurity API")
-                        .description("API REST para el sistema de seguridad con arquitectura en capas.")
+                        .description("API REST para el sistema de seguridad")
                         .version("1.0.0")
                         .contact(new Contact()
                                 .name("Equipo ModelSecurity")

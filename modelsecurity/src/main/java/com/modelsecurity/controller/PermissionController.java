@@ -49,7 +49,6 @@ public class PermissionController {
                 .map(existing -> {
                     existing.setName(dto.getName());
                     existing.setDescription(dto.getDescription());
-                    existing.setIsDeleted(dto.getIsDeleted());
                     Permission updated = permissionService.update(id, existing);
                     return ResponseEntity.ok(PermissionMapper.toDto(updated));
                 })

@@ -9,10 +9,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "user")
+@Table(name = "\"user\"")
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor @Builder
-@SQLDelete(sql = "UPDATE user SET is_deleted = true WHERE id = ?")
+@SQLDelete(sql = "UPDATE \"user\" SET is_deleted = true WHERE id = ?")
 @SQLRestriction("is_deleted = false")
 public class User {
 

@@ -33,7 +33,7 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
     private final RolRepository rolRepository;
     private final RolUserRepository rolUserRepository;
-    @Value("${jwt.expiration-ms}")
+    @Value("${spring.jwt.expiration-ms}")
     private long jwtExpirationMs;
 
     @PostMapping("/register")

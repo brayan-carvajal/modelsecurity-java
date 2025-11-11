@@ -21,7 +21,7 @@ public class FormModuleMapper {
 
         FormModule entity = new FormModule();
         entity.setId(dto.getId());
-        entity.setIsDeleted(dto.getIsDeleted());
+        entity.setIsDeleted(dto.getIsDeleted() != null ? dto.getIsDeleted() : false);
         return entity;
     }
 }

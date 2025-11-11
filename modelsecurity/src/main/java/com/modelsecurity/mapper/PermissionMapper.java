@@ -25,7 +25,7 @@ public class PermissionMapper {
         entity.setId(dto.getId());
         entity.setName(dto.getName());
         entity.setDescription(dto.getDescription());
-        entity.setIsDeleted(dto.getIsDeleted());
+        entity.setIsDeleted(dto.getIsDeleted() != null ? dto.getIsDeleted() : false);
         return entity;
     }
 }
