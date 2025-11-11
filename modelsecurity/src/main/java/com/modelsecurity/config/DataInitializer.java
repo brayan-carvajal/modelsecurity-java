@@ -29,27 +29,27 @@ public class DataInitializer {
     @Transactional
     CommandLineRunner seedInitialData() {
         return args -> {
-            // Rol USER por defecto (siempre se crea)
+            // Rol USER por defecto
             rolRepository.findByName("USER").orElseGet(() -> {
-                Rol r = Rol.builder().name("USER").description("Usuario Regular").isDeleted(false).build();
+                Rol r = Rol.builder().name("USER").description("Usuario").isDeleted(false).build();
                 return rolRepository.save(r);
             });
 
             // Usuario admin por defecto
-            final String adminEmail = "admin@example.com";
+            final String adminEmail = "admin@gmail.com";
             userRepository.findByEmail(adminEmail).ifPresentOrElse(u -> {}, () -> {
                 // Persona
                 Person p = Person.builder()
                         .firstName("Admin")
                         .lastName("System")
                         .documentType("CC")
-                        .document("999999999")
-                        .dateBorn(LocalDate.of(1990,1,1))
-                        .phoneNumber("3000000000")
-                        .gender("N")
+                        .document("1076501813")
+                        .dateBorn(LocalDate.of(2005,3,14))
+                        .phoneNumber("3188104661")
+                        .gender("M")
                         .personExter("N")
-                        .epsId("EPS0")
-                        .cityId(1)
+                        .epsId("Nueva EPS")
+                        .cityId(57)
                         .isDeleted(false)
                         .build();
                 p = personRepository.save(p);
@@ -63,9 +63,8 @@ public class DataInitializer {
                 // Usuario
                 User admin = User.builder()
                         .email(adminEmail)
-                        .password(passwordEncoder.encode("AdminSegura123!"))
+                        .password(passwordEncoder.encode("admin123"))
                         .registrationDate(LocalDateTime.now())
-            // enabled/locked removed; managed by security defaults
                         .isDeleted(false)
                         .person(p)
                         .build();
