@@ -1,9 +1,9 @@
 package com.modelsecurity.modelsecurity;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.modelsecurity.dto.auth.LoginRequest;
-import com.modelsecurity.dto.auth.RegisterRequest;
-import com.modelsecurity.repository.UserRepository;
+import com.modelsecurity.security_module.dto.auth.LoginRequest;
+import com.modelsecurity.security_module.dto.auth.RegisterRequest;
+import com.modelsecurity.security_module.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

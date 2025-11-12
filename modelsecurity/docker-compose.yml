@@ -1,46 +1,51 @@
-version: "3.8"
+version: '3.8'
 
 services:
   mysql:
     image: mysql:8.0
-    container_name: modelsecurity_mysql
+    container_name: mysql-db
     environment:
-      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: modelsecurity
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ""
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - modelsecurity_network
+      - app-network
+    restart: unless-stopped
 
   postgres:
-    image: postgres:16
-    container_name: modelsecurity_postgres
+    image: postgres:15
+    container_name: postgres-db
     environment:
+      POSTGRES_DB: modelsecurity
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: modelsecurity
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - modelsecurity_network
+      - app-network
+    restart: unless-stopped
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: modelsecurity_sqlserver
+    container_name: sqlserver-db
     environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "123456"
-      MSSQL_PID: "Developer"
+      ACCEPT_EULA: Y
+      SA_PASSWORD: "123456"
+      MSSQL_PID: Express
     ports:
       - "1433:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
     networks:
-      - modelsecurity_network
+      - app-network
+    restart: unless-stopped
 
 volumes:
   mysql_data:
@@ -48,4 +53,5 @@ volumes:
   sqlserver_data:
 
 networks:
-  modelsecurity_network:
+  app-network:
+    driver: bridge
